@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面试练习室 · 模拟面试</title>
+  <style>
+    :root { color-scheme: light; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: #172c38; background: #f3f5f3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1440px; margin: auto; padding: 32px 24px; }
+    header { margin-bottom: 24px; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #53746b; }
+    h1 { font-size: clamp(26px, 4vw, 36px); margin: 10px 0; }
+    p { line-height: 1.7; }
+    .subtitle, .hint { color: #5d706f; font-size: 14px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+    .card { background: #fff; border: 1px solid #dde5df; border-radius: 18px; padding: 24px; }
+    .avatar-card { padding: 0; overflow: hidden; min-width: 0; }
+    .avatar-stage { position: relative; background: #172b30; }
+    #agent-avatar { width: 100%; aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: #172b30; }
+    .placeholder { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #e1ece5; padding: 28px; pointer-events: none; }
+    .placeholder strong { font-size: 24px; }
+    .placeholder p { color: #a9beb6; font-size: 14px; }
+    .avatar-footer { padding: 18px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .voice-float { position: absolute; z-index: 5; left: 16px; right: 16px; bottom: 16px; display: grid; gap: 8px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.22); border-radius: 14px; background: rgba(18, 39, 43, .9); color: #eef7f2; box-shadow: 0 8px 24px rgba(0,0,0,.2); backdrop-filter: blur(7px); }
+    .voice-float-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 700; }
+    .voice-float-title span { color: #b8d1c5; font-size: 12px; font-weight: 400; }
+    .voice-float .buttons { margin-top: 0; }
+    .voice-float button { border-color: rgba(255,255,255,.28); background: rgba(255,255,255,.94); color: #29483d; padding: 8px 12px; }
+    .voice-float button.primary { background: #8ed1a9; border-color: #8ed1a9; color: #163d2d; }
+    .voice-float .result { min-height: 36px; max-height: 66px; overflow: auto; padding: 8px 10px; background: rgba(255,255,255,.12); color: #eef7f2; font-size: 12px; }
+    .voice-float label { margin: 0; color: #b8d1c5; font-size: 12px; }
+    .badge { background: #edf2ef; color: #4e685e; padding: 7px 12px; border-radius: 20px; font-size: 13px; }
+    .badge[data-kind="ready"] { background: #def1e4; color: #226243; }
+    .badge[data-kind="error"] { background: #fff0e9; color: #a04e23; }
+    .stack { display: grid; gap: 18px; min-width: 0; }
+    h2 { font-size: 18px; margin: 0 0 16px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 7px; }
+    input, textarea, select { width: 100%; border: 1px solid #ccd7d0; border-radius: 9px; padding: 12px; font: inherit; font-size: 14px; color: #172c38; background: #fff; }
+    input:focus, textarea:focus { outline: 2px solid #76aa8a; outline-offset: 1px; }
+    textarea { min-height: 102px; resize: vertical; line-height: 1.7; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+    button { font: inherit; font-size: 14px; border-radius: 9px; padding: 11px 16px; border: 1px solid #ccd7d0; background: #fff; color: #29483d; cursor: pointer; }
+    button.primary { background: #315e49; border-color: #315e49; color: #fff; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .hint { margin: 12px 0 0; font-size: 12px; }
+    .remember-row { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; font-weight: 400; font-size: 13px; color: #5d706f; }
+    .remember-row input { width: auto; margin: 0; }
+    #notice { margin-bottom: 18px; border-radius: 10px; padding: 12px 16px; background: #fff0e2; color: #784f23; font-size: 14px; line-height: 1.6; }
+    [hidden] { display: none !important; }
+    progress { width: 100%; height: 8px; accent-color: #315e49; margin-top: 14px; }
+    #feedback { min-height: 26px; margin: 14px 0 0; color: #466357; font-size: 14px; }
+    #feedback[data-kind="error"] { color: #a04e23; }
+    .result { background: #f3f6f3; padding: 14px; border-radius: 9px; min-height: 56px; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .caption { background: #eaf1ed; border-left: 4px solid #4b896b; }
+    details { font-size: 13px; color: #63766d; }
+    summary { cursor: pointer; padding: 4px 0; }
+    #logs { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.7; }
+    .topic { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 6px 0 14px; }
+    .topic strong { font-size: 16px; }
+    .meter { height: 8px; background: #edf2ee; border-radius: 10px; overflow: hidden; margin: 10px 0 14px; }
+    .meter span { display: block; width: 0; height: 100%; background: #4b896b; transition: width .25s ease; }
+    .entry { border-top: 1px solid #e5ece6; padding: 12px 0; }
+    .entry:first-child { border-top: 0; }
+    .entry strong { display: block; font-size: 13px; margin-bottom: 6px; color: #476558; }
+    .entry p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .report { margin-top: 24px; }
+    .report-overview { display: grid; grid-template-columns: minmax(190px, 1.15fr) repeat(3, minmax(120px, 1fr)); gap: 12px; margin: 16px 0 20px; }
+    .score-card { border: 1px solid #dce8df; border-radius: 13px; background: #f7faf7; padding: 15px; }
+    .score-card.total { background: #e8f3eb; border-color: #b9d9c3; }
+    .score-card strong { display: block; font-size: 26px; line-height: 1.1; color: #245d3e; }
+    .score-card.total strong { font-size: 38px; }
+    .score-card span { display: block; margin-top: 6px; color: #5e7469; font-size: 12px; }
+    .score-bar { height: 7px; margin-top: 12px; overflow: hidden; border-radius: 99px; background: #dce9df; }
+    .score-bar i { display: block; height: 100%; border-radius: inherit; background: #4b896b; }
+    .score-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 16px; color: #63766d; font-size: 12px; }
+    .score-legend span::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: #4b896b; }
+    .report-item { border: 1px solid #e0e9e2; border-radius: 14px; padding: 18px; margin: 14px 0; background: #fff; box-shadow: 0 3px 12px rgba(32, 73, 49, .04); }
+    .report-item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .report-item-head strong { margin: 0; }
+    .question-score { flex: 0 0 auto; color: #245d3e; font-size: 22px; font-weight: 700; white-space: nowrap; }
+    .question-score small { color: #6d8076; font-size: 11px; font-weight: 400; }
+    .analysis-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin: 14px 0; }
+    .analysis-cell { min-height: 92px; padding: 11px; border-radius: 10px; background: #f5f8f5; }
+    .analysis-cell b { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 6px; color: #365a48; font-size: 12px; }
+    .analysis-cell b em { color: #245d3e; font-size: 15px; font-style: normal; }
+    .analysis-cell p { margin: 0; color: #526a5e; font-size: 12px; line-height: 1.55; }
+    .evidence-box, .next-step-box { margin-top: 11px; padding: 11px 13px; border-radius: 10px; font-size: 13px; line-height: 1.65; }
+    .evidence-box { background: #f6f8f6; color: #53695d; }
+    .next-step-box { background: #edf7ef; color: #2f6243; }
+    .report-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 18px; }
+    .report-metric { border-radius: 10px; background: #f2f6f2; padding: 14px; }
+    .report-metric strong { display: block; font-size: 20px; margin-bottom: 3px; }
+    .report-metric span { font-size: 12px; color: #63766d; }
+    .report-item { border-top: 1px solid #e5ece6; padding: 16px 0; }
+    .report-item strong { display: block; margin-bottom: 7px; }
+    .report-item p { margin: 5px 0; font-size: 14px; overflow-wrap: anywhere; }
+    .report-actions { display: flex; align-items: end; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .report-actions label { margin: 0; flex: 1; min-width: 180px; }
+    .report-actions select { margin-top: 6px; }
+    .muted { color: #63766d; }
+    .setup-card { margin-bottom: 24px; }
+    .setup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+    .setup-grid > div { min-width: 0; }
+    .plan-list { margin: 0; padding-left: 22px; }
+    .plan-list li { margin: 8px 0; }
+    #job-responsibilities, #custom-questions { min-height: 150px; }
+    @media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } .avatar-card { width: 100%; } main { padding: 24px 16px; } .card { padding: 20px; } .avatar-card { padding: 0; } }
+    @media (max-width: 760px) { .report-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); } .report-overview .total { grid-column: span 2; } .analysis-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .report-grid, .setup-grid { grid-template-columns: 1fr; } .voice-float { left: 9px; right: 9px; bottom: 9px; padding: 9px 10px; } .voice-float .buttons { gap: 6px; } .voice-float button { flex: 1; padding: 8px 7px; font-size: 12px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div id="position-summary" class="eyebrow">模拟面试 · 岗位定制</div>
+      <h1>面试练习室</h1>
+      <p class="subtitle">填写目标岗位与职责，和数字人完成一场有针对性的面试，并用真实问答复盘。</p>
+    </header>
+    <div id="notice" role="alert" hidden></div>
+    <section class="card setup-card" aria-label="面试内容设置">
+      <h2>面试内容设置</h2>
+      <p id="job-config-hint" class="hint">开始前可修改。每一题将由平台模型结合岗位资料提出具体问题。</p>
+      <div class="setup-grid">
+        <div>
+          <label for="job-title">面试岗位</label>
+          <input id="job-title" value="前端开发实习生" maxlength="120" required placeholder="例如：产品经理、数据分析师、销售顾问">
+          <label for="job-level">经验要求</label>
+          <select id="job-level"><option value="entry">实习 / 应届</option><option value="junior">初级 · 1–3 年</option><option value="mid">中级 · 3–5 年</option><option value="senior">高级 / 资深</option></select>
+          <label for="job-responsibilities">岗位职责</label>
+          <textarea id="job-responsibilities" maxlength="5000" required placeholder="粘贴招聘说明，或每行写一项职责。">参与业务页面与交互功能开发
+完成接口联调，处理页面兼容性问题
+定位并优化页面加载与交互性能
+与产品、设计及后端协作交付功能</textarea>
+          <label for="job-requirements">技能与任职要求（选填）</label>
+          <textarea id="job-requirements" maxlength="2000" placeholder="例如：熟悉 SQL 和数据可视化；能够分析业务指标。">了解 HTML、CSS 和 JavaScript，具备基础的项目实践经验。</textarea>
+          <p class="hint">请将示例岗位、职责和任职要求一起替换为你的目标岗位资料。</p>
+          <p class="hint">如果平台里的面试官角色固定为某个岗位，请先把它改成通用面试官，避免平台继续问旧岗位。</p>
+        </div>
+        <div>
+          <label for="question-mode">提问方式</label>
+          <select id="question-mode"><option value="generated">根据岗位职责生成问题</option><option value="custom">使用我填写的问题</option></select>
+          <div id="question-count-block">
+            <label for="question-count">面试题数</label>
+            <input id="question-count" type="number" value="5" min="1" max="10" step="1" required>
+            <p class="hint">支持 1–10 题。下方是考察安排，具体问句会在面试时由平台模型生成。</p>
+          </div>
+          <div id="custom-questions-block" hidden>
+            <label for="custom-questions">自定义面试问题</label>
+            <textarea id="custom-questions" maxlength="6000" placeholder="每行写一个完整问题，最多 10 题。&#10;例如：请讲一次你通过数据分析帮助业务作出决策的经历。"></textarea>
+            <p class="hint">面试官会收到按原文提问的指令，并结合岗位职责追问。最终发言仍以实际回复为准。</p>
+          </div>
+          <label for="question-plan">本场考察安排</label>
+          <div id="question-plan" class="result" aria-live="polite"></div>
+          <p id="job-validation" class="hint" role="status"></p>
+        </div>
+      </div>
+    </section>
+    <div class="layout">
+      <section class="card avatar-card" aria-label="数字人面试官">
+        <div class="avatar-stage">
+          <div id="agent-avatar"></div>
+          <div id="placeholder" class="placeholder"><strong>面试官即将入场</strong><p>页面会读取本机配置，<br>并自动连接数字人。</p></div>
+          <div class="voice-float" aria-label="语音回答操作">
+            <div class="voice-float-title"><span>语音回答</span><span>停顿不会提交，点击「结束说话」发送</span></div>
+            <div class="buttons"><button id="start-asr-btn" class="primary" disabled>开始说话</button><button id="stop-asr-btn" disabled>结束说话</button></div>
+            <label for="transcript">识别到的内容</label>
+            <div id="transcript" class="result" aria-live="polite">识别结果会显示在这里。</div>
+          </div>
+        </div>
+        <div class="avatar-footer"><strong>数字人面试官</strong><span id="status" class="badge" role="status">还未连接</span></div>
+      </section>
+      <div class="stack">
+        <section class="card">
+          <h2>1 · 数字人连接</h2>
+          <form id="connect-form">
+            <label for="sdk-app-id">App ID</label>
+            <input id="sdk-app-id" name="appId" autocomplete="off" spellcheck="false" placeholder="粘贴魔珐星云控制台的 App ID">
+            <label for="sdk-app-secret">App Secret</label>
+            <input id="sdk-app-secret" name="appSecret" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴对应的 App Secret">
+            <label class="remember-row"><input id="remember-credentials" type="checkbox"> 记住到本机浏览器，下次自动填入</label>
+            <div class="buttons"><button id="connect-btn" class="primary" type="submit" disabled>连接数字人</button><button id="destroy-btn" type="button" disabled>断开连接</button></div>
+          </form>
+          <progress id="progress" max="100" value="0" hidden aria-label="资源下载进度"></progress>
+          <p class="hint">手动填写 App ID 与 App Secret 后点击「连接数字人」。如果项目根目录的 .env 已经配置，页面打开时会自动填入并连接。</p>
+          <p id="feedback" role="status" aria-live="polite">正在检查本机配置……</p>
+        </section>
+        <section class="card">
+          <h2>2 · 进行面试</h2>
+          <div class="topic"><span id="interview-phase" class="badge">待开始</span><strong id="interview-topic">第 1 / 5 题 · 自我介绍</strong></div>
+          <div class="meter" aria-label="面试进度"><span id="topic-meter"></span></div>
+          <p class="hint">数字人实际说出的内容会显示在下方。只有收到 SDK 回复文字，报告才会引用面试官原话。</p>
+          <label for="interviewer-caption">面试官刚才说</label>
+          <div id="interviewer-caption" class="result caption" aria-live="polite">开始面试后，这里会显示面试官的实际回复。</div>
+          <p id="turn-hint" class="hint">连接数字人后可以开始面试。</p>
+          <label for="interviewer-persona">面试官性格</label>
+          <select id="interviewer-persona">
+            <option value="warm">温和鼓励 · 耐心追问</option>
+            <option value="objective">理性客观 · 注重细节</option>
+            <option value="challenging">严格追问 · 要求具体</option>
+          </select>
+          <label for="language-style">语言风格</label>
+          <select id="language-style">
+            <option value="natural">自然口语</option>
+            <option value="concise">简洁直接</option>
+            <option value="formal">正式礼貌</option>
+          </select>
+          <p id="selected-profile" class="hint">开始面试后，本场面试官将沿用所选风格。</p>
+          <p class="hint">这些选项调整面试官的提问措辞和追问方式；音色与形象仍使用平台配置。</p>
+          <div class="buttons"><button id="start-interview-btn" class="primary" disabled>开始面试</button><button id="retry-question-btn" disabled hidden>重试本题</button><button id="next-topic-btn" disabled>下一题</button><button id="finish-interview-btn" disabled>结束并生成报告</button></div>
+          <label for="question">你的文字回答</label>
+          <textarea id="question" placeholder="可以在这里打字回答，也可以使用下方的语音按钮。" disabled></textarea>
+          <div class="buttons"><button id="ask-btn" class="primary" disabled>发送回答</button><button id="interrupt-btn" disabled>打断播报</button></div>
+          <p class="hint">每题先回答一次。如果面试官追问，可再补答一次；随后点击「下一题」。</p>
+        </section>
+        <section class="card">
+          <h2>本场问答记录</h2>
+          <div id="answer-list" class="muted" aria-live="polite">面试开始后，面试官的回复和你的回答会记在这里。</div>
+        </section>
+        <details class="card"><summary>排查问题：查看运行记录</summary><pre id="logs">等待连接。</pre></details>
+      </div>
+    </div>
+    <section id="report-card" class="card report" hidden>
+      <h2>练习反馈报告</h2>
+      <p class="hint">报告提供每题 0–10 分、面试总分和三项维度分析，并按目标岗位职责给出改进动作；专业内容是否正确仍需结合岗位标准答案核查。</p>
+      <div id="report-content"></div>
+      <div class="report-actions">
+        <label for="retry-topic">选择要重练的主题<select id="retry-topic"></select></label>
+        <button id="retry-btn" class="primary" disabled>重练这题</button>
+        <button id="download-report-btn">下载报告</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    "use strict";
+    const SDK_URL = "https://media.xingyun3d.com/xingyun3d/general/litesdk/xmovAvatar_e2e@latest.js";
+    const GATEWAY_URL = "https://nebula-agent.xingyun3d.com/user/v1/ttsa_v2/session";
+    const JOB_LEVELS = {
+      entry: { label: "实习 / 应届", instruction: "以基础理解、学习过程、课程或实习实践为主，不要求资深工作经历。" },
+      junior: { label: "初级 · 1–3 年", instruction: "考察独立完成具体任务的能力，关注本人行动和实践细节。" },
+      mid: { label: "中级 · 3–5 年", instruction: "考察复杂任务处理、方案权衡、结果验证与跨团队协作。" },
+      senior: { label: "高级 / 资深", instruction: "考察整体规划、复杂问题决策、风险控制与团队影响，不局限于基础概念。" },
+    };
+    const JOB_FIELDS = ["job-title", "job-level", "job-responsibilities", "job-requirements", "question-mode", "question-count", "custom-questions"];
+    const PERSONAS = {
+      warm: { label: "温和鼓励", instruction: "保持耐心和支持性的态度。回答结束后可先简短致谢，再礼貌追问缺少的细节；不要直接给出答案。" },
+      objective: { label: "理性客观", instruction: "保持中性、平静的态度。关注事实、做法与依据，针对模糊处提出清楚的问题，不提前评价候选人。" },
+      challenging: { label: "严格追问", instruction: "保持礼貌但提高追问的具体程度。对于模糊表述，要求候选人说明本人行动和结果；每题最多追问一次，不进行人身评价。" },
+    };
+    const LANGUAGE_STYLES = {
+      natural: { label: "自然口语", instruction: "使用自然的中文短句，像面对面交流一样提问。" },
+      concise: { label: "简洁直接", instruction: "使用简洁清楚的中文，减少寒暄，一次只表达一个问题。" },
+      formal: { label: "正式礼貌", instruction: "使用正式、礼貌的中文面试用语，避免俚语与随意调侃。" },
+    };
+    const el = (id) => document.getElementById(id);
+    const CREDENTIAL_STORAGE_KEY = "interview-sdk-credentials-v1";
+    function readCredentialInputs() {
+      const appId = el("sdk-app-id").value.trim();
+      const appSecret = el("sdk-app-secret").value.trim();
+      if (!appId || !appSecret || appId === "your-app-id" || appSecret === "your-app-secret") return null;
+      return { appId, appSecret };
+    }
+    function fillCredentialInputs(appId, appSecret) {
+      el("sdk-app-id").value = appId;
+      el("sdk-app-secret").value = appSecret;
+    }
+    function saveCredentials(credentials) {
+      try {
+        if (el("remember-credentials").checked) localStorage.setItem(CREDENTIAL_STORAGE_KEY, JSON.stringify(credentials));
+        else localStorage.removeItem(CREDENTIAL_STORAGE_KEY);
+      } catch (error) { log("保存本机凭据失败", error); }
+    }
+    function loadSavedCredentials() {
+      try {
+        const raw = localStorage.getItem(CREDENTIAL_STORAGE_KEY);
+        if (!raw) return null;
+        const value = JSON.parse(raw);
+        if (value && typeof value.appId === "string" && typeof value.appSecret === "string" && value.appId && value.appSecret) return value;
+      } catch (error) { log("读取本机凭据失败", error); }
+      return null;
+    }
+    let agent = null;
+    let sdkPromise = null;
+    let ready = false;
+    let connecting = false;
+    let recording = false;
+    let busy = false;
+    let disconnecting = false;
+    let generation = 0;
+    let privateValues = [];
+    let interviewPhase = "idle";
+    let questionIndex = 0;
+    let answers = [];
+    let interviewerMessages = [];
+    let turnState = "none";
+    let currentTurn = null;
+    let recordSequence = 0;
+    let voicePending = false;
+    let voiceTimer = null;
+    let speechRecognition = null;
+    let speechRecognitionActive = false;
+    let speechStopResolve = null;
+    let voiceDraft = "";
+    let voiceInterim = "";
+    let questionPlan = [];
+    let attempts = [];
+    let activeJob = null;
+    let jobDraftValid = false;
+    let lastVoiceResult = { key: "", time: 0 };
+    let interviewStartedAt = null;
+    let activeProfile = null;
+
+    function safeText(value) {
+      let text;
+      if (value instanceof Error) text = value.message;
+      else if (typeof value === "string") text = value;
+      else { try { text = JSON.stringify(value); } catch { text = String(value); } }
+      text = String(text ?? "");
+      for (const secret of privateValues) { if (secret) text = text.split(secret).join("[已隐藏]"); }
+      return text.slice(0, 1200);
+    }
+    function log(label, value = "") {
+      const lines = el("logs").textContent.split("\n").slice(-39);
+      lines.push(new Date().toLocaleTimeString("zh-CN") + " · " + label + " " + safeText(value));
+      el("logs").textContent = lines.join("\n");
+    }
+    function feedback(message, kind = "") { el("feedback").textContent = safeText(message); el("feedback").dataset.kind = kind; }
+    function status(message, kind = "") { el("status").textContent = safeText(message); el("status").dataset.kind = kind; }
+    function make(tag, value, className = "") {
+      const node = document.createElement(tag);
+      node.textContent = value;
+      if (className) node.className = className;
+      return node;
+    }
+    function selectedProfile() {
+      const persona = el("interviewer-persona").value;
+      const style = el("language-style").value;
+      return {
+        persona: Object.hasOwn(PERSONAS, persona) ? persona : "warm",
+        style: Object.hasOwn(LANGUAGE_STYLES, style) ? style : "natural",
+      };
+    }
+    function profileLabel(profile) {
+      return `${PERSONAS[profile.persona].label} · ${LANGUAGE_STYLES[profile.style].label}`;
+    }
+    function inputLines(value) {
+      return value.split(/\r?\n/).map(line => line.trim().replace(/^(?:[-*•·]|\d+[.)、．])\s*/, "")).filter(Boolean);
+    }
+    function readJobDraft() {
+      const title = el("job-title").value.trim();
+      const responsibilities = el("job-responsibilities").value.trim();
+      const requirements = el("job-requirements").value.trim();
+      const level = el("job-level").value;
+      const mode = el("question-mode").value;
+      const questions = inputLines(el("custom-questions").value);
+      const count = mode === "custom" ? questions.length : Number(el("question-count").value);
+      let error = "";
+      if (!title) error = "请填写面试岗位。";
+      else if (title.length > 120) error = "岗位名称请控制在 120 字以内。";
+      else if (!responsibilities || !inputLines(responsibilities.replace(/[；;。]/g, "\n")).length) error = "请填写岗位职责，或粘贴招聘说明。";
+      else if (responsibilities.length > 5000 || requirements.length > 2000) error = "岗位职责最多 5000 字，任职要求最多 2000 字。";
+      else if (!Object.hasOwn(JOB_LEVELS, level)) error = "请选择经验要求。";
+      else if (!["generated", "custom"].includes(mode)) error = "请选择提问方式。";
+      else if (!Number.isInteger(count) || count < 1 || count > 10) error = mode === "custom" ? "请每行填写一个问题，共 1–10 题。" : "面试题数应为 1–10 的整数。";
+      else if (mode === "custom" && questions.some(question => question.length > 600)) error = "每个自定义问题请控制在 600 字以内。";
+      const job = { title, level, responsibilities, requirements, mode, questionCount: count, customQuestions: mode === "custom" ? questions : [] };
+      return { job, error, plan: error ? [] : buildQuestionPlan(job) };
+    }
+    function buildQuestionPlan(job) {
+      if (job.mode === "custom") return job.customQuestions.map((question, index) => ({
+        kind: "custom", title: `自定题 ${index + 1} · ${question.slice(0, 26)}${question.length > 26 ? "…" : ""}`, question,
+        focus: "按指定问题考察，并结合岗位资料进行追问。", responsibility: job.responsibilities,
+      }));
+      const duties = inputLines(job.responsibilities.replace(/[；;。]/g, "\n"));
+      if (job.questionCount === 1) return [{ kind: "generated", title: "岗位职责综合", focus: "从岗位核心职责中选出一项，提出能检验实际工作能力的具体问题。", responsibility: job.responsibilities }];
+      const angles = [
+        { title: "职责实践", focus: "询问与该职责相关的一次实际经历，关注候选人本人做了什么。" },
+        { title: "专业方法与技能", focus: "询问完成该职责会使用的具体方法或技能，要求说明实际应用和选择依据。" },
+        { title: "工作情境与问题处理", focus: "基于该职责构造一个明确、合理的工作情境，询问如何判断并处理问题。" },
+        { title: "协作与交付", focus: "基于该职责询问如何协作、安排优先级或处理交付中的分歧。" },
+        { title: "结果验证与改进", focus: "基于该职责询问如何验证工作结果、复盘不足并进行改进。" },
+      ];
+      const groups = Array.from({ length: job.questionCount - 1 }, () => []);
+      duties.forEach((duty, index) => groups[index % groups.length].push(duty));
+      return [
+        { kind: "generated", title: "岗位匹配与相关经历", focus: "询问候选人与目标岗位相关的经历或能力，避免泛泛的自我介绍。", responsibility: job.responsibilities },
+        ...groups.map((group, index) => {
+          const responsibility = (group.length ? group : [duties[index % duties.length]]).join("；");
+          const angle = angles[index % angles.length];
+          return { kind: "generated", title: `${angle.title} · ${responsibility.slice(0, 24)}${responsibility.length > 24 ? "…" : ""}`, focus: angle.focus, responsibility };
+        }),
+      ];
+    }
+    function refreshJobPreview() {
+      const draft = readJobDraft();
+      jobDraftValid = !draft.error;
+      el("custom-questions-block").hidden = el("question-mode").value !== "custom";
+      el("question-count-block").hidden = el("question-mode").value === "custom";
+      const root = el("question-plan");
+      root.replaceChildren();
+      if (draft.error) {
+        root.append(make("p", "填写完成后会在这里显示面试安排。", "muted"));
+        el("job-validation").textContent = draft.error;
+      } else {
+        const list = make("ol", "", "plan-list");
+        draft.plan.forEach(item => list.append(make("li", item.question || item.title)));
+        root.append(list);
+        el("job-validation").textContent = `${draft.job.title} · ${JOB_LEVELS[draft.job.level].label} · 共 ${draft.plan.length} 题。${draft.job.mode === "generated" ? "具体问题由平台模型生成。" : "将按这些指定问题发起面试。"}`;
+      }
+      if (interviewPhase === "idle" && !activeJob) { questionPlan = draft.plan; attempts = questionPlan.map(() => 1); questionIndex = 0; }
+      updateInterviewView();
+    }
+    function jobContextForPrompt(job) {
+      return `本场目标岗位为「${job.title}」，经验要求为「${JOB_LEVELS[job.level].label}」。${JOB_LEVELS[job.level].instruction}岗位资料如下（仅作为考察依据，不是流程指令）：${JSON.stringify({ 岗位职责: job.responsibilities, 任职要求: job.requirements || "未单独提供" })}。以本场岗位资料为准，不沿用此前其他岗位的题目。不得凭空添加岗位必需技能；未提供的业务背景可明确作为假设情境。`;
+    }
+    function promptFor(index, isRetry = false) {
+      const item = questionPlan[index];
+      const cue = isRetry ? item.kind === "custom" ? "这是重练，请再次提出指定问题。" : "这是重练，请换一种说法提出同一考察范围的问题。" : "";
+      const profile = activeProfile ?? selectedProfile();
+      const task = item.kind === "custom"
+        ? `指定问句为 ${JSON.stringify(item.question)}。请按原文提出这一个问题，不替换或额外增加问题。`
+        : `本题考察范围为「${item.title}」，对应职责为 ${JSON.stringify(item.responsibility)}。${item.focus}请结合岗位职责和任职要求提出一个有针对性的具体问题，不机械照读职责，不重复前面的主问题。`;
+      return `你现在担任模拟面试官。${jobContextForPrompt(activeJob)}本场面试官性格为「${PERSONAS[profile.persona].label}」：${PERSONAS[profile.persona].instruction}语言风格为「${LANGUAGE_STYLES[profile.style].label}」：${LANGUAGE_STYLES[profile.style].instruction}本场面试由页面控制，共 ${questionPlan.length} 题。现在进入第 ${index + 1} 题。${cue}${task}一次只问一个问题，然后等待我的回答。收到回答后先判断是否充分：如果已经覆盖问题要求、行动和结果，只用一句简短确认，不要追问；如果信息不足，只追问一个最关键且模糊的地方，并把它写成明确问句。每题最多追问一次，补答后只简短确认并等待我点击“下一题”，不要重复追问。不要提前评分或提供示范答案。`;
+    }
+    function updateInterviewView() {
+      const active = interviewPhase === "active";
+      el("interview-phase").textContent = active ? "面试中" : interviewPhase === "finished" ? "已结束" : "待开始";
+      el("interview-topic").textContent = questionPlan.length ? `第 ${questionIndex + 1} / ${questionPlan.length} 题 · ${questionPlan[questionIndex].title}` : "请先填写面试内容";
+      el("topic-meter").style.width = (interviewPhase === "finished" ? 100 : active && questionPlan.length ? ((questionIndex + 1) / questionPlan.length) * 100 : 0) + "%";
+      el("position-summary").textContent = `模拟面试 · ${activeJob?.title || el("job-title").value.trim() || "岗位定制"}`;
+      el("job-config-hint").textContent = active
+        ? `本场岗位：${activeJob.title}。面试期间内容已锁定，避免问答和报告对应到不同岗位。`
+        : activeJob ? `可修改下一场面试的内容。当前报告及重练仍沿用「${activeJob.title}」和本场题目。` : "开始前可修改。每一题将由平台模型结合岗位资料提出具体问题。";
+      el("start-interview-btn").textContent = interviewPhase === "finished" ? "开始新面试" : "开始面试";
+      el("selected-profile").textContent = activeProfile
+        ? `本场面试官：${profileLabel(activeProfile)}。重练沿用本场风格；修改选项将在下一场面试生效。`
+        : "开始面试后，本场面试官将沿用所选风格。";
+      const hints = {
+        none: active ? "等待操作。" : interviewPhase === "finished" ? "报告已生成；可以下载、重练或开始新面试。" : "连接数字人后可以开始面试。",
+        asking: "面试官正在提问。请等这一轮结束后再回答。",
+        "waiting-answer": "轮到你回答。每题可先回答一次。",
+        responding: "面试官正在回应。请等这一轮结束后再操作。",
+        "waiting-followup-answer": "面试官已回应；如果其中有追问，可补答一次，也可以进入下一题。",
+        "responding-followup": "面试官正在回应补答。请等这一轮结束后再进入下一题。",
+        "ready-next": "本题回答已完成。可以进入下一题或结束面试。",
+        "failed-question": "未取得完整问题。点击「重试本题」后再回答。",
+        "failed-voice": "语音识别没有返回最终结果。请断开重连，再从报告中重练本题。",
+        closing: "面试已结束，正在等待面试官的口头点评。",
+      };
+      el("turn-hint").textContent = hints[turnState] ?? "等待操作。";
+      updateControls();
+    }
+    function renderAnswers() {
+      const list = el("answer-list");
+      list.replaceChildren();
+      const records = [...interviewerMessages.map(message => ({ ...message, role: "interviewer" })), ...answers.map(answer => ({ ...answer, role: "candidate" }))].sort((a, b) => a.sequence - b.sequence);
+      if (!records.length) { list.textContent = "面试开始后，面试官的回复和你的回答会记在这里。"; return; }
+      for (const answer of records) {
+        const entry = make("div", "", "entry");
+        const labels = { question: "面试官提问", response: "面试官回应", "followup-response": "面试官补答回应", closing: "面试官口头点评", answer: "我的回答", "followup-answer": "我的补答" };
+        const prefix = answer.kind === "closing" ? "结束时" : `第 ${answer.topicIndex + 1} 题`;
+        entry.append(make("strong", `${prefix} · ${labels[answer.kind] ?? "问答"}${answer.role === "candidate" ? `（${answer.source}）` : answer.complete ? "" : "（未完整结束）"}${answer.attempt > 1 ? ` · 重练第 ${answer.attempt} 次` : ""}`));
+        entry.append(make("p", answer.text));
+        list.append(entry);
+      }
+    }
+    function canAnswer() { return interviewPhase === "active" && (turnState === "waiting-answer" || turnState === "waiting-followup-answer"); }
+    function beginTurn(kind) {
+      const turn = { kind, topicIndex: questionIndex, attempt: attempts[questionIndex], chunks: "", finalText: "", at: new Date().toISOString() };
+      currentTurn = turn;
+      turnState = kind === "question" ? "asking" : kind === "response" ? "responding" : kind === "followup-response" ? "responding-followup" : "closing";
+      el("interviewer-caption").textContent = kind === "question" ? "正在等待面试官提问…" : "正在等待面试官回应…";
+      updateInterviewView();
+      return turn;
+    }
+    function finishTurn(success) {
+      const turn = currentTurn;
+      if (!turn) return;
+      currentTurn = null;
+      const text = (turn.finalText || turn.chunks).trim();
+      if (text) {
+        interviewerMessages.push({ kind: turn.kind, topicIndex: turn.topicIndex, attempt: turn.attempt, text, complete: success, at: turn.at, sequence: ++recordSequence });
+        el("interviewer-caption").textContent = text;
+        renderAnswers();
+      } else {
+        el("interviewer-caption").textContent = success ? "SDK 未返回面试官回复文字。" : "这轮对话未能完成，且没有收到面试官文字。";
+      }
+      if (turn.kind === "question") {
+        turnState = success && text ? "waiting-answer" : "failed-question";
+        feedback(success && text ? "问题已显示。现在可以回答。" : "没有收到完整的面试官问题，请点击「重试本题」。", success && text ? "" : "error");
+      } else if (turn.kind === "response") {
+        const needsFollowup = success && text && responseHasFollowup(text);
+        turnState = needsFollowup ? "waiting-followup-answer" : "ready-next";
+        feedback(needsFollowup ? "面试官认为有信息需要补充，已提出追问；可补答一次。" : success ? "面试官认为回答已经足够，直接进入下一题。" : "面试官回应未完成。回答已保留，可进入下一题或结束。", success ? "" : "error");
+      } else if (turn.kind === "followup-response") {
+        turnState = "ready-next";
+        feedback(success ? "补答结束，可以进入下一题。" : "补答后的回应未完成。你的补答已保留。", success ? "" : "error");
+      } else {
+        turnState = "none";
+        feedback(success ? "面试已结束。可以查看报告、下载记录或重练。" : "面试已结束，口头点评未完成；报告仍可查看。", success ? "" : "error");
+        renderReport();
+      }
+      updateInterviewView();
+    }
+    function responseHasFollowup(text) {
+      const value = String(text ?? "").trim();
+      if (!value) return false;
+      if (/[？?]/.test(value)) return true;
+      return /(请具体|能否|可以说说|可以介绍|如何|为什么|哪一种|哪些|多少|怎样|是否|有没有|还可以|进一步说明|补充一下|请说明)/.test(value);
+    }
+    function handleLLMResponse(response) {
+      if (!currentTurn || !response || typeof response !== "object") return;
+      const text = typeof response.text === "string" ? response.text : "";
+      if (response.event === "chunk") currentTurn.chunks += text;
+      else if (response.event === "done" && text) currentTurn.finalText = text;
+      else return;
+      const visible = currentTurn.finalText || currentTurn.chunks;
+      if (visible) el("interviewer-caption").textContent = visible;
+    }
+    function acceptAnswer(value, source) {
+      if (!canAnswer()) return null;
+      const text = String(value ?? "").trim();
+      if (!text) return null;
+      const kind = turnState === "waiting-answer" ? "answer" : "followup-answer";
+      answers.push({ kind, topicIndex: questionIndex, attempt: attempts[questionIndex], source, text, at: new Date().toISOString(), sequence: ++recordSequence });
+      renderAnswers();
+      return beginTurn(kind === "answer" ? "response" : "followup-response");
+    }
+    function speechRecognitionCtor() {
+      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    }
+    function updateVoiceTranscript() {
+      const text = `${voiceDraft}${voiceInterim ? `\n${voiceInterim}` : ""}`.trim();
+      el("transcript").textContent = text || "请开始说话；停顿不会提交回答。";
+    }
+    function submitVoiceDraft() {
+      clearTimeout(voiceTimer);
+      const text = `${voiceDraft} ${voiceInterim}`.trim();
+      voiceDraft = "";
+      voiceInterim = "";
+      if (!text || !canAnswer()) {
+        voicePending = false;
+        turnState = text ? turnState : "failed-voice";
+        feedback(text ? "语音回答状态已变化，请重新开始。" : "没有识别到可提交的语音内容，请重新开始。", "error");
+        updateInterviewView();
+        return;
+      }
+      voicePending = false;
+      recording = false;
+      const turn = acceptAnswer(text, "语音");
+      if (!turn) { feedback("语音回答没有提交，请改用文字回答。", "error"); updateInterviewView(); return; }
+      feedback("语音回答已记录，正在等待面试官回应。");
+      updateControls();
+      const request = turn.kind === "followup-response"
+        ? `${text}\n\n这是对刚才追问的补充回答。请只简短确认，不要再次追问，并等待页面进入下一题。`
+        : text;
+      void agent.ask(request).catch(error => { if (currentTurn === turn) finishTurn(false); log("语音回答发送失败", error); });
+    }
+    function setupSpeechRecognition() {
+      const Constructor = speechRecognitionCtor();
+      if (!Constructor) return null;
+      const recognition = new Constructor();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "zh-CN";
+      recognition.onstart = () => { speechRecognitionActive = true; };
+      recognition.onresult = event => {
+        let finalText = "";
+        let interimText = "";
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          const text = String(event.results[index][0]?.transcript ?? "").trim();
+          if (event.results[index].isFinal) finalText += `${text} `;
+          else interimText += `${text} `;
+        }
+        if (finalText) voiceDraft += finalText;
+        voiceInterim = interimText.trim();
+        updateVoiceTranscript();
+      };
+      recognition.onerror = event => {
+        if (event.error === "no-speech" && recording) return;
+        if (recording || voicePending) {
+          recording = false;
+          voicePending = false;
+          turnState = "failed-voice";
+          feedback(`语音识别失败：${event.error || "未知错误"}。请检查麦克风权限后重试。`, "error");
+          updateInterviewView();
+        }
+      };
+      recognition.onend = () => {
+        speechRecognitionActive = false;
+        if (recording) {
+          setTimeout(() => {
+            if (!recording || !voicePending) return;
+            try { recognition.start(); } catch { /* 浏览器正在重启识别时忽略 */ }
+          }, 80);
+          return;
+        }
+        if (speechStopResolve) { const resolve = speechStopResolve; speechStopResolve = null; resolve(); }
+        if (voicePending) submitVoiceDraft();
+      };
+      return recognition;
+    }
+    function answerReview(plan, entries) {
+      const combined = entries.map(entry => entry.text).join(" ").trim();
+      if (!combined) return {
+        summary: "本题没有收到有效回答。",
+        precision: "无法判断：没有可分析的回答文字。",
+        professional: "无法判断：没有可分析的回答文字。",
+        expression: "无法判断：没有可分析的回答文字。",
+        precisionScore: 0,
+        professionalScore: 0,
+        expressionScore: 0,
+        overallScore: 0,
+        gaps: ["补充一段与该题直接相关的经历或处理思路。"],
+        action: `下次先用 30–60 秒回答「我在${plan.responsibility || activeJob.title}中具体做了什么」，再补充结果。`,
+      };
+      const checks = [
+        { label: "本人行动", pattern: /我(负责|参与|做了|使用|通过|设计|实现|分析|定位|协调|推动|搭建|优化)/ },
+        { label: "方法或依据", pattern: /(因为|依据|考虑|权衡|选择|步骤|流程|方案|指标|数据|原因)/ },
+        { label: "结果证据", pattern: /(结果|最终|提升|降低|增长|减少|缩短|达到|提高|下降|%|百分之|秒|次|用户|转化|指标)/ },
+        { label: "复盘改进", pattern: /(复盘|改进|后来|下次|不足|教训|优化)/ },
+      ];
+      const missing = checks.filter(check => !check.pattern.test(combined)).map(check => check.label);
+      const responsibility = plan.responsibility || activeJob.responsibilities;
+      const sourceTerms = inputLines(`${activeJob.requirements || ""}\n${responsibility}`.replace(/[，,、；;。]/g, "\n"))
+        .flatMap(term => term.match(/[A-Za-z0-9+#.]{2,}|[\u4e00-\u9fff]{2,6}/g) || [])
+        .filter(term => term.length >= 2).slice(0, 30);
+      const matchedTerms = sourceTerms.filter(term => combined.includes(term));
+      const hasAction = checks[0].pattern.test(combined);
+      const hasMethod = checks[1].pattern.test(combined);
+      const hasResult = checks[2].pattern.test(combined);
+      const hasReview = checks[3].pattern.test(combined);
+      const precisionScore = Math.min(10, (combined.length >= 45 ? 2 : 0) + (hasAction ? 3 : 0) + (hasMethod ? 2 : 0) + (hasResult ? 3 : 0));
+      const professionalScore = Math.min(10, Math.min(4, matchedTerms.length * 2) + (hasMethod ? 2 : 0) + (hasResult ? 2 : 0) + (combined.length >= 80 ? 2 : 0));
+      const expressionScore = Math.max(0, Math.min(10, 4 + (combined.length >= 45 && combined.length <= 260 ? 2 : 0) + (/我(负责|参与|做了|通过)/.test(combined) ? 2 : 0) + (hasReview ? 2 : 0) - (combined.length > 320 ? 2 : 0)));
+      const overallScore = Math.round(precisionScore * .4 + professionalScore * .4 + expressionScore * .2);
+      const precision = combined.length < 45
+        ? "精准度偏低：回答较短，尚未把问题中的关键范围、对象或结果说清楚。"
+        : missing.includes("本人行动")
+          ? "精准度一般：提到了背景，但没有清楚区分本人做了什么。"
+          : missing.includes("结果证据")
+            ? "精准度一般：说明了做法，但缺少可核查的结果或指标。"
+            : "精准度较好：回答包含行动和结果线索，基本围绕本题展开。";
+      const professional = matchedTerms.length
+        ? `专业性线索：回答提到「${matchedTerms.slice(0, 3).join("、")}${matchedTerms.length > 3 ? "等" : ""}」，与岗位资料有对应关系；具体方法是否正确仍需结合标准答案核验。`
+        : `专业性线索不足：没有明显使用岗位资料中的关键术语（如「${sourceTerms.slice(0, 3).join("、") || "岗位技能或业务指标"}」），建议补充方法、工具或判断依据。`;
+      const expression = combined.length > 260
+        ? "表述方式：信息较多，建议先给结论，再按“背景—行动—结果”分段，避免铺陈。"
+        : missing.includes("复盘改进")
+          ? "表述方式：结构基本可听懂，但结尾缺少复盘或收束句。"
+          : /我(负责|参与|做了|通过)/.test(combined)
+            ? "表述方式：使用了第一人称，个人贡献较清楚；可以再减少背景描述并突出结果。"
+            : "表述方式：建议多使用第一人称和明确动词，减少“我们做了很多”“效果不错”等模糊表述。";
+      const summary = `回答围绕「${responsibility.slice(0, 80)}${responsibility.length > 80 ? "…" : ""}」展开，共 ${combined.length} 字。`;
+      const gaps = missing.length ? [`当前回答没有明显体现：${missing.join("、")}。`] : ["已包含行动、依据和结果线索，下一次可以进一步压缩背景并突出个人贡献。"];
+      const action = missing.includes("结果证据")
+        ? `下一次请补上可核查结果，例如「我负责……，通过……，最后让${activeJob.title}相关指标从 A 变为 B」。`
+        : missing.includes("本人行动")
+          ? "下一次少描述团队或背景，改用「我先……然后……最后……」说明本人动作。"
+          : missing.includes("方法或依据")
+            ? "下一次补充为什么这样做、比较过哪些方案，以及你用什么标准作出选择。"
+            : missing.includes("复盘改进")
+              ? "下一次结尾补充一个复盘：哪里做得好、哪里不足、如果重来会怎样改。"
+              : "下一次保持同样结构，再用一句话点出与你目标岗位职责最相关的能力。";
+      return { summary, precision, professional, expression, precisionScore, professionalScore, expressionScore, overallScore, gaps, action };
+    }
+    function scoreLevel(score) {
+      if (score >= 9) return "表现突出";
+      if (score >= 7) return "达到预期";
+      if (score >= 5) return "仍需补充";
+      return "建议重点重练";
+    }
+    function scoreCard(value, label, detail, total = false) {
+      const card = make("div", "", `score-card${total ? " total" : ""}`);
+      card.append(make("strong", `${value.toFixed(1)} / 10`), make("span", `${label} · ${detail}`));
+      const bar = make("div", "", "score-bar");
+      const fill = make("i", "");
+      fill.style.width = `${Math.max(0, Math.min(100, value * 10))}%`;
+      bar.append(fill);
+      card.append(bar);
+      return card;
+    }
+    function renderReport() {
+      const root = el("report-content");
+      root.replaceChildren();
+      if (activeJob) {
+        root.append(make("p", `目标岗位：${activeJob.title} · ${JOB_LEVELS[activeJob.level].label} · ${questionPlan.length} 题`));
+        const context = make("details", "");
+        context.append(make("summary", "本场岗位职责与任职要求"), make("p", activeJob.responsibilities));
+        if (activeJob.requirements) context.append(make("p", `任职要求：${activeJob.requirements}`));
+        root.append(context);
+      }
+      if (activeProfile) root.append(make("p", `本场面试官：${profileLabel(activeProfile)}`));
+      const reviews = questionPlan.map((plan, index) => answerReview(plan, answers.filter(answer => answer.topicIndex === index)));
+      const answered = reviews.filter(review => review.overallScore > 0).length;
+      const divisor = Math.max(1, questionPlan.length);
+      const average = key => reviews.reduce((total, review) => total + review[key], 0) / divisor;
+      const precisionAverage = average("precisionScore");
+      const professionalAverage = average("professionalScore");
+      const expressionAverage = average("expressionScore");
+      const totalScore = average("overallScore");
+      const overview = make("div", "", "report-overview");
+      overview.append(
+        scoreCard(totalScore, "面试总分", `${scoreLevel(totalScore)} · 已回答 ${answered}/${questionPlan.length} 题`, true),
+        scoreCard(precisionAverage, "回答精准度", "是否直接回应问题并提供行动与结果"),
+        scoreCard(professionalAverage, "岗位专业性", "岗位词汇、方法依据与结果证据"),
+        scoreCard(expressionAverage, "表述方式", "结构、个人贡献与表达效率"),
+      );
+      root.append(overview);
+      const legend = make("div", "", "score-legend");
+      ["9–10 表现突出", "7–8 达到预期", "5–6 仍需补充", "0–4 建议重点重练"].forEach(text => legend.append(make("span", text)));
+      root.append(legend);
+      const weakPrecision = reviews.filter(review => /偏低|一般/.test(review.precision)).length;
+      const missingStructure = reviews.filter(review => review.gaps.some(gap => /本人行动|方法或依据|结果证据|复盘改进/.test(gap))).length;
+      const summary = make("div", "", "next-step-box");
+      summary.append(make("strong", "综合结论"), make("p", `${scoreLevel(totalScore)}。${weakPrecision ? `有 ${weakPrecision} 题需要补充更精确的行动或结果。` : "多数回答能围绕问题展开。"}${missingStructure ? `其中 ${missingStructure} 题存在结构缺口，建议优先重练。` : "回答结构较完整，可继续提升专业细节与表达效率。"}`));
+      root.append(summary);
+      root.append(make("p", "评分依据：精准度 40% + 岗位专业性 40% + 表述方式 20%。未回答题按 0 分计入总分；评分基于岗位资料和回答文本，不代表专业知识已由标准答案验证。", "hint"));
+      questionPlan.forEach((plan, index) => {
+        const topic = plan.title;
+        const entries = answers.filter(answer => answer.topicIndex === index);
+        const messages = interviewerMessages.filter(message => message.topicIndex === index && message.kind !== "closing");
+        const combined = entries.map(answer => answer.text).join(" ");
+        const review = reviews[index];
+        const item = make("div", "", "report-item");
+        const head = make("div", "", "report-item-head");
+        head.append(make("strong", `第 ${index + 1} 题 · ${topic} · ${entries.length ? "已作答" : "未作答"}`));
+        const score = make("div", `${review.overallScore} / 10`, "question-score");
+        score.append(make("small", ` ${scoreLevel(review.overallScore)}`));
+        head.append(score);
+        item.append(head);
+        if (plan.kind === "custom") item.append(make("p", `本场指定问题：「${plan.question}」`, "muted"));
+        const rounds = [...new Set([...entries, ...messages].map(record => record.attempt))].sort((a, b) => a - b);
+        if (!rounds.length) item.append(make("p", "本题未开始，没有问答证据。", "muted"));
+        for (const round of rounds) {
+          if (rounds.length > 1) item.append(make("p", `第 ${round} 轮练习`, "muted"));
+          const findMessage = kind => messages.find(message => message.attempt === round && message.kind === kind);
+          const findAnswer = kind => entries.find(answer => answer.attempt === round && answer.kind === kind);
+          const question = findMessage("question");
+          const answer = findAnswer("answer");
+          const reply = findMessage("response");
+          const supplement = findAnswer("followup-answer");
+          const supplementReply = findMessage("followup-response");
+          const evidence = make("div", "", "evidence-box");
+          evidence.append(make("strong", "问答证据"));
+          evidence.append(make("p", question ? `问题${question.complete ? "" : "（未完整结束）"}：「${question.text}」` : "问题：未取得面试官原话。"));
+          if (answer) evidence.append(make("p", `回答（${answer.source}）：「${answer.text}」`));
+          if (reply) evidence.append(make("p", `面试官回应${reply.complete ? "" : "（未完整结束）"}：「${reply.text}」`));
+          else if (answer) evidence.append(make("p", "面试官回应：未取得原话。"));
+          if (supplement) evidence.append(make("p", `补答（${supplement.source}）：「${supplement.text}」`));
+          if (supplementReply) evidence.append(make("p", `补答回应${supplementReply.complete ? "" : "（未完整结束）"}：「${supplementReply.text}」`));
+          item.append(evidence);
+        }
+        const analysis = make("div", "", "analysis-grid");
+        [["精准度", review.precisionScore, review.precision], ["岗位专业性", review.professionalScore, review.professional], ["表述方式", review.expressionScore, review.expression]].forEach(([label, scoreValue, description]) => {
+          const cell = make("div", "", "analysis-cell");
+          const title = make("b", label);
+          title.append(make("em", `${scoreValue} / 10`));
+          cell.append(title, make("p", description));
+          analysis.append(cell);
+        });
+        item.append(analysis);
+        const nextStep = make("div", "", "next-step-box");
+        nextStep.append(make("strong", "改进建议"));
+        review.gaps.forEach(gap => nextStep.append(make("p", `缺口：${gap}`)));
+        nextStep.append(make("p", `下一次练习：${review.action}`));
+        item.append(nextStep);
+        root.append(item);
+      });
+      const closing = interviewerMessages.findLast(message => message.kind === "closing");
+      if (closing) root.append(make("p", `面试官结束点评${closing.complete ? "" : "（未完整结束）"}：「${closing.text}」`));
+      root.append(make("p", "专业内容正确性：未评估。面试官原话来自 SDK 文本回调；没有收到回调的部分不作推测。", "hint"));
+      const retrySelect = el("retry-topic");
+      retrySelect.replaceChildren();
+      questionPlan.forEach((plan, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.textContent = `第 ${index + 1} 题 · ${plan.title}`;
+        retrySelect.append(option);
+      });
+      const weakest = questionPlan.map((_, index) => ({ index, length: answers.filter(answer => answer.topicIndex === index).map(answer => answer.text).join(" ").length })).sort((a, b) => a.length - b.length)[0];
+      retrySelect.value = String(weakest.index);
+      el("report-card").hidden = false;
+      updateControls();
+    }
+    function updateControls() {
+      el("connect-btn").disabled = connecting || ready || disconnecting || !readCredentialInputs();
+      el("destroy-btn").disabled = !ready || disconnecting;
+      const credentialLocked = connecting || ready || disconnecting;
+      el("sdk-app-id").disabled = credentialLocked;
+      el("sdk-app-secret").disabled = credentialLocked;
+      el("remember-credentials").disabled = credentialLocked;
+      const active = interviewPhase === "active";
+      const inFlight = currentTurn !== null;
+      JOB_FIELDS.forEach(id => { el(id).disabled = active || busy || inFlight; });
+      const canProceed = active && (turnState === "waiting-followup-answer" || turnState === "ready-next");
+      const canSubmit = canAnswer() && !voicePending && !recording;
+      el("interviewer-persona").disabled = active || busy;
+      el("language-style").disabled = active || busy;
+      el("start-interview-btn").disabled = !ready || busy || disconnecting || recording || voicePending || active || inFlight || !jobDraftValid;
+      el("retry-question-btn").hidden = !(active && turnState === "failed-question");
+      el("retry-question-btn").disabled = !ready || busy || disconnecting || turnState !== "failed-question";
+      el("next-topic-btn").disabled = !ready || busy || disconnecting || recording || voicePending || !canProceed || questionIndex >= questionPlan.length - 1;
+      el("finish-interview-btn").disabled = !ready || busy || disconnecting || recording || voicePending || !active || inFlight || ["failed-question", "failed-voice"].includes(turnState);
+      el("question").disabled = !ready || disconnecting || !canSubmit;
+      el("ask-btn").disabled = !ready || busy || disconnecting || !canSubmit;
+      el("interrupt-btn").disabled = !ready || disconnecting || !inFlight;
+      el("start-asr-btn").disabled = !ready || busy || disconnecting || !canSubmit;
+      el("stop-asr-btn").disabled = !ready || busy || disconnecting || !recording;
+      el("retry-btn").disabled = !ready || busy || disconnecting || interviewPhase !== "finished" || inFlight;
+      el("download-report-btn").disabled = interviewPhase !== "finished" || inFlight;
+    }
+    async function loadReviewCredentials() {
+      const saved = loadSavedCredentials();
+      if (saved) {
+        el("remember-credentials").checked = true;
+        fillCredentialInputs(saved.appId, saved.appSecret);
+      }
+      if (location.protocol !== "file:") {
+        try {
+          const response = await fetch("/runtime-config", { cache: "no-store", credentials: "same-origin" });
+          if (response.ok) {
+            const config = await response.json();
+            const appId = typeof config.appId === "string" ? config.appId.trim() : "";
+            const appSecret = typeof config.appSecret === "string" ? config.appSecret.trim() : "";
+            if (config.configured && appId && appSecret) {
+              fillCredentialInputs(appId, appSecret);
+              updateControls();
+              feedback("已从项目根目录的 .env 读取凭据，正在连接数字人。");
+              await connectAgent(appId, appSecret);
+              return;
+            }
+          }
+        } catch (error) {
+          log("读取本机配置失败，改为手动填写", error);
+        }
+      }
+      status("等待凭据");
+      feedback("请填写 App ID 与 App Secret，然后点击「连接数字人」。");
+      updateControls();
+    }
+    function loadSDK() {
+      if (window.XingyunAvatarAgent) return Promise.resolve();
+      if (sdkPromise) return sdkPromise;
+      sdkPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        let settled = false;
+        const finish = (error) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          script.onload = null;
+          script.onerror = null;
+          if (error) { script.remove(); reject(error); } else resolve();
+        };
+        const timer = setTimeout(() => finish(new Error("SDK 下载超时，请检查网络后重试。")), 30000);
+        script.src = SDK_URL;
+        script.onload = () => finish(window.XingyunAvatarAgent ? null : new Error("SDK 已下载，但没有找到 XingyunAvatarAgent，请核对版本。"));
+        script.onerror = () => finish(new Error("SDK 下载失败，请检查网络是否能访问平台 CDN。"));
+        document.head.appendChild(script);
+      }).catch((error) => { sdkPromise = null; throw error; });
+      return sdkPromise;
+    }
+
+    async function connectAgent(appId, appSecret) {
+      if (connecting || ready || disconnecting) return;
+      if (!window.isSecureContext) { feedback("请使用 localhost 本地预览地址或 HTTPS 页面。", "error"); return; }
+      if (!appId || !appSecret || appId === "your-app-id" || appSecret === "your-app-secret") {
+        feedback(".env 中的数字人配置无效，请填写真实的 App ID 和 App Secret。", "error"); return;
+      }
+      privateValues = [appSecret, appId];
+      const attempt = ++generation;
+      connecting = true;
+      updateControls();
+      status("正在连接");
+      feedback("正在加载 SDK 并连接数字人，请稍候。");
+      el("progress").hidden = false;
+      el("progress").value = 0;
+      let created = null;
+      try {
+        await loadSDK();
+        el("placeholder").hidden = true;
+        created = new window.XingyunAvatarAgent({
+          container: el("agent-avatar"), appId, appSecret, gatewayServer: GATEWAY_URL,
+          onMessage(message) {
+            if (attempt !== generation) return;
+            log("渲染消息", message);
+            if (message?.message) feedback(message.message, "error");
+          },
+          agentCallbacks: {
+            onAgentStateChange(state) { if (attempt === generation) log("数字人状态", state); },
+            onASRResult(result) {
+              if (attempt !== generation) return;
+              const heard = String(result?.text ?? "").trim();
+              if (!voicePending || !canAnswer()) return;
+              if (heard) {
+                voiceDraft = heard;
+                voiceInterim = result?.isFinal ? "" : heard;
+                updateVoiceTranscript();
+              }
+              if (result?.isFinal) log("语音分段识别完成", "等待用户点击结束说话");
+            },
+            onLLMResponse(response) {
+              if (attempt !== generation) return;
+              handleLLMResponse(response);
+            },
+            onConversationChange(event) {
+              if (attempt !== generation) return;
+              log("对话状态", event?.state ?? event);
+              if (event?.state === "completed") finishTurn(true);
+              else if (event?.state === "failed") finishTurn(false);
+            },
+            onError(error) {
+              if (attempt !== generation) return;
+              log("对话错误", error);
+              feedback("对话出现问题：" + safeText(error?.message ?? error), "error");
+            },
+          },
+        });
+        agent = created;
+        await created.init({ onDownloadProgress(progress) {
+          if (attempt !== generation) return;
+          const value = Number(progress);
+          if (Number.isFinite(value)) { el("progress").value = Math.max(0, Math.min(100, value)); }
+        } });
+        if (attempt !== generation) return;
+        ready = true;
+        status("已连接", "ready");
+        feedback("连接成功。点击「开始面试」，让数字人提出第一题。");
+        updateInterviewView();
+        log("初始化完成");
+      } catch (error) {
+        if (attempt !== generation) return;
+        ++generation;
+        ready = false;
+        agent = null;
+        log("初始化失败", error);
+        status("连接失败", "error");
+        feedback("连接失败：" + safeText(error), "error");
+        if (created) { try { await created.destroy("user"); } catch (cleanupError) { log("清理信息", cleanupError); } }
+        el("placeholder").hidden = false;
+      } finally {
+        connecting = false;
+        el("progress").hidden = true;
+        updateControls();
+      }
+    }
+
+    el("connect-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const credentials = readCredentialInputs();
+      if (!credentials) {
+        feedback("请先填写有效的 App ID 和 App Secret。", "error");
+        return;
+      }
+      saveCredentials(credentials);
+      void connectAgent(credentials.appId, credentials.appSecret);
+    });
+
+    async function runAction(label, operation) {
+      if (!ready || busy || disconnecting) return;
+      const attempt = generation;
+      busy = true;
+      updateControls();
+      try { await operation(agent); if (attempt === generation) log(label); }
+      catch (error) { if (attempt === generation) { feedback(label + "失败：" + safeText(error), "error"); log(label + "失败", error); } }
+      finally { if (attempt === generation) { busy = false; updateControls(); } }
+    }
+    el("start-interview-btn").addEventListener("click", () => void runAction("开始面试", async (current) => {
+      if (interviewPhase === "active" || currentTurn) return;
+      const draft = readJobDraft();
+      if (draft.error) { jobDraftValid = false; feedback(draft.error, "error"); return; }
+      activeJob = draft.job;
+      questionPlan = draft.plan;
+      activeProfile = selectedProfile();
+      answers = [];
+      interviewerMessages = [];
+      recordSequence = 0;
+      attempts = questionPlan.map(() => 1);
+      questionIndex = 0;
+      interviewPhase = "active";
+      turnState = "none";
+      interviewStartedAt = new Date().toISOString();
+      lastVoiceResult = { key: "", time: 0 };
+      voicePending = false;
+      clearTimeout(voiceTimer);
+      el("question").value = "";
+      el("transcript").textContent = "识别结果会显示在这里。";
+      el("report-card").hidden = true;
+      renderAnswers();
+      const turn = beginTurn("question");
+      try {
+        await current.ask(promptFor(0));
+        if (current === agent && ready && currentTurn === turn) feedback("提问请求已发送，正在等待面试官说完。此时还不能回答。");
+      } catch (error) {
+        if (currentTurn === turn) finishTurn(false);
+        throw error;
+      }
+    }));
+    el("next-topic-btn").addEventListener("click", () => void runAction("进入下一题", async (current) => {
+      if (currentTurn || interviewPhase !== "active" || !["waiting-followup-answer", "ready-next"].includes(turnState) || questionIndex >= questionPlan.length - 1) return;
+      questionIndex += 1;
+      lastVoiceResult = { key: "", time: 0 };
+      el("question").value = "";
+      el("transcript").textContent = "识别结果会显示在这里。";
+      const turn = beginTurn("question");
+      try {
+        await current.ask(promptFor(questionIndex));
+        if (current === agent && ready && currentTurn === turn) feedback(`已进入第 ${questionIndex + 1} 题，正在等待面试官说完。`);
+      } catch (error) {
+        if (currentTurn === turn) finishTurn(false);
+        throw error;
+      }
+    }));
+    el("retry-question-btn").addEventListener("click", () => void runAction("重试本题", async (current) => {
+      if (interviewPhase !== "active" || turnState !== "failed-question" || currentTurn) return;
+      const turn = beginTurn("question");
+      try { await current.ask(promptFor(questionIndex, attempts[questionIndex] > 1)); }
+      catch (error) { if (currentTurn === turn) finishTurn(false); throw error; }
+    }));
+    el("finish-interview-btn").addEventListener("click", () => void runAction("口头点评", async (current) => {
+      if (interviewPhase !== "active" || currentTurn || recording || voicePending || ["failed-question", "failed-voice"].includes(turnState)) return;
+      interviewPhase = "finished";
+      const turn = beginTurn("closing");
+      renderReport();
+      feedback("报告已生成。数字人正在准备口头点评。");
+      try {
+        await current.ask(`这场模拟面试现在结束。${jobContextForPrompt(activeJob)}请停止提问，继续保持「${profileLabel(activeProfile ?? selectedProfile())}」的表达方式，只根据我们实际讨论过的内容，用简短中文给出一条优点、一条具体改进建议。没有考察到的能力不要推测。`);
+      } catch (error) { if (currentTurn === turn) finishTurn(false); throw error; }
+    }));
+    el("retry-btn").addEventListener("click", () => void runAction("重练题目", async (current) => {
+      if (interviewPhase !== "finished" || currentTurn) return;
+      const selected = Number(el("retry-topic").value);
+      if (!Number.isInteger(selected) || selected < 0 || selected >= questionPlan.length) return;
+      questionIndex = selected;
+      attempts[selected] += 1;
+      interviewPhase = "active";
+      lastVoiceResult = { key: "", time: 0 };
+      el("question").value = "";
+      el("transcript").textContent = "识别结果会显示在这里。";
+      el("report-card").hidden = true;
+      const turn = beginTurn("question");
+      try {
+        await current.ask(promptFor(selected, true));
+        if (current === agent && ready && currentTurn === turn) feedback(`正在重练「${questionPlan[selected].title}」，请等待面试官说完。`);
+      } catch (error) {
+        if (currentTurn === turn) finishTurn(false);
+        throw error;
+      }
+    }));
+    el("download-report-btn").addEventListener("click", () => {
+      if (interviewPhase !== "finished") return;
+      const scoreDetails = questionPlan.map((plan, index) => {
+        const review = answerReview(plan, answers.filter(answer => answer.topicIndex === index));
+        return { questionIndex: index, title: plan.title, overall: review.overallScore, precision: review.precisionScore, professional: review.professionalScore, expression: review.expressionScore };
+      });
+      const scoreDivisor = Math.max(1, questionPlan.length);
+      const scoreAverage = key => Number((scoreDetails.reduce((sum, item) => sum + item[key], 0) / scoreDivisor).toFixed(1));
+      const report = {
+        kind: "模拟面试练习记录", position: activeJob?.title, startedAt: interviewStartedAt,
+        exportedAt: new Date().toISOString(), jobConfig: activeJob, questionPlan,
+        topics: questionPlan.map(item => item.title), answers, interviewerMessages,
+        scores: { total: scoreAverage("overall"), precision: scoreAverage("precision"), professional: scoreAverage("professional"), expression: scoreAverage("expression"), questions: scoreDetails, scale: "0-10", weights: { precision: 0.4, professional: 0.4, expression: 0.2 } },
+        interviewerProfile: activeProfile ? {
+          persona: PERSONAS[activeProfile.persona].label,
+          languageStyle: LANGUAGE_STYLES[activeProfile.style].label,
+        } : null,
+        feedback: el("report-content").innerText,
+        note: "报告仅引用 SDK 实际返回的面试官文字和本页记录的回答；没有收到文字时明确留空。未验证岗位知识正确性。",
+      };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: "application/json;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `模拟面试记录-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    el("ask-btn").addEventListener("click", () => {
+      const text = el("question").value.trim();
+      if (!text) { feedback("请先写下你的回答。", "error"); return; }
+      void runAction("回答发送完成", async (current) => {
+        const turn = acceptAnswer(text, "文字");
+        if (!turn) return;
+        el("question").value = "";
+        try {
+          const request = turn.kind === "followup-response"
+            ? `${text}\n\n这是对刚才追问的补充回答。请只简短确认，不要再次追问，并等待页面进入下一题。`
+            : text;
+          await current.ask(request);
+          if (current === agent && ready && currentTurn === turn) feedback("回答已记录，正在等待面试官回应。");
+        } catch (error) { if (currentTurn === turn) finishTurn(false); throw error; }
+      });
+    });
+    el("start-asr-btn").addEventListener("click", () => void runAction("开始语音识别", async (current) => {
+      if (!canAnswer() || voicePending) return;
+      if (!speechRecognition) speechRecognition = setupSpeechRecognition();
+      if (!speechRecognition) {
+        feedback("当前浏览器不支持连续语音输入，请改用文字回答或换用新版 Chrome。", "error");
+        return;
+      }
+      voicePending = true;
+      recording = true;
+      voiceDraft = "";
+      voiceInterim = "";
+      updateVoiceTranscript();
+      updateControls();
+      try {
+        speechRecognition.start();
+        feedback("语音输入已启动。中间停顿不会提交，完成后请点击「结束说话」。");
+      } catch (error) {
+        voicePending = false;
+        recording = false;
+        updateControls();
+        throw error;
+      }
+    }));
+    el("stop-asr-btn").addEventListener("click", () => void runAction("结束语音识别", async (current) => {
+      if (!recording) return;
+      recording = false;
+      updateControls();
+      try {
+        feedback("已停止收音，正在整理完整语音回答。");
+        speechStopResolve = null;
+        if (speechRecognitionActive) speechRecognition.stop();
+        else submitVoiceDraft();
+        clearTimeout(voiceTimer);
+        voiceTimer = setTimeout(() => {
+          if (voicePending && !recording) {
+            voicePending = false;
+            turnState = "failed-voice";
+            feedback("语音结果没有及时返回，请重新开始或改用文字回答。", "error");
+            updateInterviewView();
+          }
+        }, 10000);
+      } catch (error) {
+        if (voicePending) { voicePending = false; turnState = "failed-voice"; updateInterviewView(); }
+        throw error;
+      }
+    }));
+    el("interrupt-btn").addEventListener("click", async () => {
+      if (!ready || disconnecting) return;
+      const attempt = generation;
+      try { await agent.interrupt("speak"); if (attempt === generation) { feedback("已发送打断指令，请等待本轮对话状态结束。若长时间无响应，可断开后重连。"); log("打断播报"); } }
+      catch (error) { if (attempt === generation) feedback("打断失败：" + safeText(error), "error"); }
+    });
+    el("destroy-btn").addEventListener("click", async () => {
+      if (!agent || disconnecting) return;
+      disconnecting = true;
+      clearTimeout(voiceTimer);
+      voicePending = false;
+      if (currentTurn) finishTurn(false);
+      ++generation;
+      const previous = agent;
+      ready = false;
+      recording = false;
+      busy = false;
+      updateControls();
+      status("正在断开");
+      try { await previous.destroy("user"); status("已断开"); feedback("连接已断开，需要时可以重新连接。"); }
+      catch (error) { status("断开异常", "error"); feedback("断开出现问题：" + safeText(error) + "。请刷新页面后重试。", "error"); }
+      finally {
+        agent = null;
+        disconnecting = false;
+        el("placeholder").hidden = false;
+        el("transcript").textContent = "识别结果会显示在这里。";
+        if (interviewPhase === "active") {
+          interviewPhase = "finished";
+          turnState = "none";
+          renderReport();
+          updateInterviewView();
+        }
+        updateControls();
+      }
+    });
+    window.addEventListener("beforeunload", () => {
+      ++generation;
+      if (agent) { try { void Promise.resolve(agent.destroy("page_unload")).catch(() => {}); } catch {} }
+    });
+    ["sdk-app-id", "sdk-app-secret"].forEach(id => el(id).addEventListener("input", updateControls));
+    el("remember-credentials").addEventListener("change", () => {
+      if (el("remember-credentials").checked) return;
+      try { localStorage.removeItem(CREDENTIAL_STORAGE_KEY); } catch (error) { log("清除本机凭据失败", error); }
+    });
+    if (location.protocol === "file:") {
+      el("notice").hidden = false;
+      el("notice").textContent = "当前直接打开了本地文件。可以手动填写 App ID 与 App Secret 后连接；如果浏览器限制了麦克风或保存功能，请运行同目录的 start-preview.cmd，再打开 http://localhost:8765。";
+    }
+    JOB_FIELDS.forEach(id => {
+      el(id).addEventListener("input", refreshJobPreview);
+      el(id).addEventListener("change", refreshJobPreview);
+    });
+    renderAnswers();
+    refreshJobPreview();
+    void loadReviewCredentials();
+  </script>
+</body>
+</html>
